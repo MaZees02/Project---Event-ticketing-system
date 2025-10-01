@@ -1,1 +1,72 @@
+<<<<<<< HEAD
 
+=======
+version: "3.8"
+
+services:
+  user_service:
+    # dev mode
+    build:
+      context: ./services/user_service
+      dockerfile: Dockerfile
+    env_file:
+      - ./services/user_service/.env
+    volumes:
+      - ./services/user_service:/app   # bind-mount for live code edit
+      - ./data/user_service:/app/data  # persisted sqlite or other data
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+  event_service:
+    build:
+      context: ./services/event_service
+      dockerfile: Dockerfile
+    env_file:
+      - ./services/event_service/.env
+    volumes:
+      - ./services/event_service:/app
+      - ./data/event_service:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
+    ports:
+      - "8002:8002"
+    restart: unless-stopped
+    depends_on:
+      - user_service
+
+  payment_service:
+    build:
+      context: ./services/payment_service
+      dockerfile: Dockerfile
+    env_file:
+      - ./services/payment_service/.env
+    volumes:
+      - ./services/payment_service:/app
+      - ./data/payment_service:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
+    ports:
+      - "8003:8003"
+    restart: unless-stopped
+    depends_on:
+      - user_service
+
+  ticket_service:
+    build:
+      context: ./services/ticket_service
+      dockerfile: Dockerfile
+    env_file:
+      - ./services/ticket_service/.env
+    volumes:
+      - ./services/ticket_service:/app
+      - ./data/ticket_service:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8004 --reload
+    ports:
+      - "8004:8004"
+    restart: unless-stopped
+    depends_on:
+      - payment_service
+      - event_service
+
+
+>>>>>>> c016af0 (Add requirements.txt for Render deployment)
